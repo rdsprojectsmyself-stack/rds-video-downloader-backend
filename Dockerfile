@@ -1,23 +1,16 @@
-FROM node:18-bookworm
+FROM node:20-bullseye
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y \
-        ffmpeg \
-        curl \
-        python3 \
-        python3-pip \
-    && pip3 install --no-cache-dir yt-dlp \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get install -y ffmpeg python3 python3-pip curl && \
+    pip3 install --no-cache-dir yt-dlp && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Optional: verify installations
-RUN ffmpeg -version && yt-dlp --version && node -v && npm -v
-
-# Set working directory
+# App directory
 WORKDIR /app
 
-# Copy package files (if you have Node app)
+# Copy package files
 COPY package*.json ./
 
 # Install node dependencies
@@ -26,8 +19,8 @@ RUN npm install
 # Copy app source
 COPY . .
 
-# Expose port (change if needed)
-EXPOSE 3000
+# Expose Render port
+EXPOSE 10000
 
-# Start app
-CMD ["npm", "start"]
+# Start server
+CMD ["node", "server.js"]
