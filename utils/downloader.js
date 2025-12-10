@@ -1,34 +1,14 @@
-const youtubedl = require("youtube-dl-exec");
-const path = require("path");
-const fs = require("fs");
+const ytdlp = require('yt-dlp-exec');
+const path = require('path');
 
-const binaryPath = path.join(__dirname, "..", "bin", "yt-dlp");
+async function download(url, format = 'mp4') {
+  const outputPath = path.join('/tmp', '%(title)s.%(ext)s');
 
-async function ensureYTDLP() {
-  if (!fs.existsSync(binaryPath)) {
-    console.log("yt-dlp binary missing. Downloading...");
-
-    const { execSync } = require("child_process");
-    try {
-      execSync(
-        `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o ${binaryPath}`
-      );
-      execSync(`chmod +x ${binaryPath}`);
-      console.log("yt-dlp downloaded & made executable.");
-    } catch (err) {
-      console.error("Error downloading yt-dlp:", err);
-    }
-  }
+  return ytdlp(url, {
+    output: outputPath,
+    format: format === 'mp3' ? 'bestaudio' : 'best',
+    mergeOutputFormat: format,
+  });
 }
 
-exports.download = async (url, output) => {
-  await ensureYTDLP();
-
-  return youtubedl(url, {
-    output,
-    binaryPath,
-    noCheckCertificates: true,
-    noWarnings: true,
-    format: "mp4",
-  });
-};
+module.exports = { download };
